@@ -1,1 +1,3 @@
-# servidor-python
+Flask
+Pandas
+matplotlib
