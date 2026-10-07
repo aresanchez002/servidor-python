@@ -1,31 +1,40 @@
-from flask import Flask, jsonify, render_template_string
-import sqlite3
-import pandas as pd
+import os
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # Permite peticiones desde el frontend
 
-# --- 1. BASE DE DATOS SQLITE (TIENDA DE TECNOLOGÍA) ---
-def init_db():
-    conn = sqlite3.connect('tienda.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ventas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            producto TEXT NOT NULL,
-            categoria TEXT NOT NULL,
-            precio REAL NOT NULL,
-            cantidad INTEGER NOT NULL,
-            metodo_pago TEXT NOT NULL,
-            monto_total REAL NOT NULL,
-            stock INTEGER NOT NULL
-        )
-    ''')
-    cursor.execute('SELECT COUNT(*) FROM ventas')
-    if cursor.fetchone()[0] == 0:
-        datos_ejemplo = [
-            ('Laptop Pro 15', 'Cómputo', 1200.00, 5, 'Tarjeta de Crédito', 6000.00, 18),
-            ('Smartphone X', 'Telefonía', 800.00, 8, 'Transferencia', 6400.00, 25),
-            ('Audífonos Noise-Cancel', 'Audio', 150.00, 15, 'Tarjeta de Crédito', 2250.00, 4),
-            ('Monitor 4K 27"', 'Cómputo', 350.00, 10, 'Efectivo', 3500.00, 12),
-            ('Teclado Mecánico', 'Accesorios', 90.00, 20, 'Transferencia', 1800.00, 30),
-            ('Tablet Pro 11', 'Telefonía', 600.00 
+
+# Ruta de prueba
+@app.route("/", methods=["GET"])
+def index():
+    return jsonify({"status": "success", "message": "Servidor activo y corriendo"})
+
+
+# Ruta de API de ejemplo (obtener datos)
+@app.route("/api/data", methods=["GET"])
+def get_data():
+    return jsonify(
+        {
+            "items": [
+                {"id": 1, "nombre": "Elemento 1"},
+                {"id": 2, "nombre": "Elemento 2"},
+            ]
+        }
+    )
+
+
+# Ruta de API de ejemplo (recibir datos)
+@app.route("/api/data", methods=["POST"])
+def post_data():
+    data = request.get_json() or {}
+    return jsonify(
+        {"status": "creado", "recibido": data}
+    ), 201
+
+
+if __name__ == "__main__":
+    # Render asigna dinámicamente un puerto en la variable PORT
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
