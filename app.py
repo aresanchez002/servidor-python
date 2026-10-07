@@ -6,15 +6,17 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-DB_NAME = "arelly_cosmetics_hk_v2.db"
+DB_NAME = "arelly_cosmetics_hk_v3.db"
+
+# URL de la imagen completa generada
+IMAGE_URL = "watermarked_img_2698944802837133687.jpg"
 
 
 def init_db():
-    """Inicializa la base de datos SQLite con imágenes actualizadas de Hello Kitty."""
+    """Inicializa la base de datos SQLite con los 5 productos y posiciones CSS de imagen."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Tabla de Productos
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS productos (
@@ -22,12 +24,12 @@ def init_db():
             nombre TEXT NOT NULL,
             categoria TEXT NOT NULL,
             precio REAL NOT NULL,
-            imagen TEXT NOT NULL
+            imagen TEXT NOT NULL,
+            posicion_css TEXT NOT NULL
         )
     """
     )
 
-    # Tabla de Ventas
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS ventas (
@@ -39,7 +41,6 @@ def init_db():
     """
     )
 
-    # Insertar los 5 productos requeridos con imágenes enfocadas en Hello Kitty / Kawaii
     cursor.execute("SELECT COUNT(*) FROM productos")
     if cursor.fetchone()[0] == 0:
         productos_iniciales = [
@@ -47,35 +48,40 @@ def init_db():
                 "Labial Matte Hello Kitty Edition",
                 "Labios",
                 240.0,
-                "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400",
+                IMAGE_URL,
+                "0% 80%",
             ),
             (
                 "Paleta de Sombras Hello Kitty Pink",
                 "Ojos & Rostro",
                 580.0,
-                "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400",
+                IMAGE_URL,
+                "45% 70%",
             ),
             (
                 "Set de Brochas Edición Hello Kitty",
                 "Accesorios",
                 420.0,
-                "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400",
+                IMAGE_URL,
+                "25% 10%",
             ),
             (
                 "Rubor Sostenible Hello Kitty Rose",
                 "Mejillas",
                 290.0,
-                "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400",
+                IMAGE_URL,
+                "85% 15%",
             ),
             (
                 "Iluminador Diamond Hello Kitty Shine",
                 "Rostro",
                 340.0,
-                "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=400",
+                IMAGE_URL,
+                "95% 85%",
             ),
         ]
         cursor.executemany(
-            "INSERT INTO productos (nombre, categoria, precio, imagen) VALUES (?, ?, ?, ?)",
+            "INSERT INTO productos (nombre, categoria, precio, imagen, posicion_css) VALUES (?, ?, ?, ?, ?)",
             productos_iniciales,
         )
 
@@ -115,8 +121,12 @@ HTML_TEMPLATE = """
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 50px; }
         .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 15px rgba(0,0,0,0.06); border: 2px solid #ffe4e1; transition: transform 0.3s, box-shadow 0.3s; text-align: center; padding-bottom: 20px; position: relative; }
         .card:hover { transform: translateY(-7px); box-shadow: 0 12px 20px rgba(255,105,180,0.25); }
-        .card img.prod-img { width: 100%; height: 180px; object-fit: cover; }
-        .card h3 { color: #ff1493; font-size: 1.2rem; margin: 12px 10px 5px; }
+        
+        /* Formato e imagen recortada enfocado en cada producto */
+        .img-container { width: 100%; height: 200px; overflow: hidden; position: relative; }
+        .card img.prod-img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.6); }
+        
+        .card h3 { color: #ff1493; font-size: 1.15rem; margin: 12px 10px 5px; }
         .card .badge { background: #ffe4e1; color: #d63384; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-bottom: 8px; }
         .sales-info { font-size: 0.9rem; color: #e83e8c; font-weight: bold; background: #fff0f5; padding: 5px 10px; margin: 0 15px 10px; border-radius: 10px; }
         .price { font-size: 1.25rem; font-weight: bold; color: #5a3a41; margin-bottom: 12px; }
@@ -142,7 +152,7 @@ HTML_TEMPLATE = """
     </header>
 
     <div class="container">
-        <!-- 1. PRIMERO: Catálogo de Productos -->
+        <!-- 1. Catálogo de Productos con Imagen Distribuida -->
         <h2 class="section-title">
             <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_art.png" style="width: 35px;" alt="HK">
             Productos en Venta (Hello Kitty Edition)
@@ -150,7 +160,7 @@ HTML_TEMPLATE = """
         </h2>
         <div class="grid" id="productGrid"></div>
 
-        <!-- 2. DESPUÉS: Gráfica de Porcentajes -->
+        <!-- 2. Gráfica de Porcentajes -->
         <div class="chart-card">
             <h2 class="section-title">
                 📊 Porcentaje de Ventas de Cada Producto
@@ -176,7 +186,9 @@ HTML_TEMPLATE = """
                 grid.innerHTML += `
                     <div class="card">
                         <img class="kitty-corner" src="https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_art.png" alt="HK">
-                        <img class="prod-img" src="${prod.imagen}" alt="${prod.nombre}">
+                        <div class="img-container">
+                            <img class="prod-img" src="${prod.imagen}" style="object-position: ${prod.posicion_css};" alt="${prod.nombre}">
+                        </div>
                         <h3>${prod.nombre}</h3>
                         <span class="badge">${prod.categoria}</span>
                         <div class="sales-info">🛍️ Vendidos: ${prod.unidades_vendidas} uds.</div>
@@ -261,7 +273,7 @@ def get_productos():
     cursor = conn.cursor()
     cursor.execute(
         """
-        SELECT p.id, p.nombre, p.categoria, p.precio, p.imagen, COALESCE(SUM(v.unidades_vendidas), 0)
+        SELECT p.id, p.nombre, p.categoria, p.precio, p.imagen, p.posicion_css, COALESCE(SUM(v.unidades_vendidas), 0)
         FROM productos p
         LEFT JOIN ventas v ON p.id = v.producto_id
         GROUP BY p.id
@@ -277,7 +289,8 @@ def get_productos():
             "categoria": f[2],
             "precio": f[3],
             "imagen": f[4],
-            "unidades_vendidas": f[5],
+            "posicion_css": f[5],
+            "unidades_vendidas": f[6],
         }
         for f in filas
     ]
