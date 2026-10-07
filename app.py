@@ -28,4 +28,4 @@ def init_db():
             ('Audífonos Noise-Cancel', 'Audio', 150.00, 15, 'Tarjeta de Crédito', 2250.00, 4),
             ('Monitor 4K 27"', 'Cómputo', 350.00, 10, 'Efectivo', 3500.00, 12),
             ('Teclado Mecánico', 'Accesorios', 90.00, 20, 'Transferencia', 1800.00, 30),
-            ('Tablet Pro 11', 'Telefonía', 600.00
+            ('Tablet Pro 11', 'Telefonía', 600.00 
