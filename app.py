@@ -6,11 +6,11 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-DB_NAME = "arelly_cosmetics.db"
+DB_NAME = "arelly_cosmetics_hk_v2.db"
 
 
 def init_db():
-    """Inicializa la base de datos SQLite con los datos de Arelly Cosmetics."""
+    """Inicializa la base de datos SQLite con imágenes actualizadas de Hello Kitty."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
@@ -39,38 +39,38 @@ def init_db():
     """
     )
 
-    # Insertar los 5 productos requeridos si la tabla está vacía
+    # Insertar los 5 productos requeridos con imágenes enfocadas en Hello Kitty / Kawaii
     cursor.execute("SELECT COUNT(*) FROM productos")
     if cursor.fetchone()[0] == 0:
         productos_iniciales = [
             (
-                "Labial Matte Velvet Arelly",
+                "Labial Matte Hello Kitty Edition",
                 "Labios",
-                230.0,
+                240.0,
                 "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400",
             ),
             (
-                "Paleta de Maquillaje Glow Kitty",
+                "Paleta de Sombras Hello Kitty Pink",
                 "Ojos & Rostro",
-                560.0,
+                580.0,
                 "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400",
             ),
             (
-                "Set de Brochas Pink Edition",
+                "Set de Brochas Edición Hello Kitty",
                 "Accesorios",
-                390.0,
+                420.0,
                 "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400",
             ),
             (
-                "Rubor Silk Rose Arelly",
+                "Rubor Sostenible Hello Kitty Rose",
                 "Mejillas",
-                280.0,
+                290.0,
                 "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400",
             ),
             (
-                "Iluminador Diamond Shine",
+                "Iluminador Diamond Hello Kitty Shine",
                 "Rostro",
-                320.0,
+                340.0,
                 "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=400",
             ),
         ]
@@ -79,8 +79,7 @@ def init_db():
             productos_iniciales,
         )
 
-        # Unidades vendidas de prueba para calcular porcentajes
-        ventas_iniciales = [(1, 150), (2, 95), (3, 110), (4, 85), (5, 75)]
+        ventas_iniciales = [(1, 160), (2, 110), (3, 125), (4, 90), (5, 80)]
         cursor.executemany(
             "INSERT INTO ventas (producto_id, unidades_vendidas) VALUES (?, ?)",
             ventas_iniciales,
@@ -90,7 +89,6 @@ def init_db():
     conn.close()
 
 
-# Inicializar la base de datos automáticamente
 init_db()
 
 # --- Plantilla HTML Kawaii Hello Kitty ---
@@ -108,26 +106,28 @@ HTML_TEMPLATE = """
         body { background-color: #fff0f5; color: #5a3a41; }
         header { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #d63384; padding: 35px 20px; text-align: center; border-bottom: 5px solid #ff69b4; position: relative; }
         header h1 { font-size: 2.8rem; text-shadow: 1px 1px 2px rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; gap: 15px; }
-        .kitty-logo { width: 60px; height: auto; filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.1)); }
+        .kitty-logo { width: 65px; height: auto; filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.15)); }
         header p { font-size: 1.25rem; margin-top: 5px; color: #b8256f; font-weight: 600; }
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-        .section-title { font-size: 1.8rem; color: #d63384; margin-bottom: 20px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        /* Contenedor de la Gráfica */
-        .chart-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 8px 20px rgba(255,105,180,0.15); border: 2px solid #ffb6c1; margin-bottom: 40px; }
+        .section-title { font-size: 1.8rem; color: #d63384; margin-bottom: 25px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
         /* Grid de Productos */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 15px rgba(0,0,0,0.06); border: 2px solid #ffe4e1; transition: transform 0.3s, box-shadow 0.3s; text-align: center; padding-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 50px; }
+        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 15px rgba(0,0,0,0.06); border: 2px solid #ffe4e1; transition: transform 0.3s, box-shadow 0.3s; text-align: center; padding-bottom: 20px; position: relative; }
         .card:hover { transform: translateY(-7px); box-shadow: 0 12px 20px rgba(255,105,180,0.25); }
-        .card img { width: 100%; height: 180px; object-fit: cover; }
+        .card img.prod-img { width: 100%; height: 180px; object-fit: cover; }
         .card h3 { color: #ff1493; font-size: 1.2rem; margin: 12px 10px 5px; }
         .card .badge { background: #ffe4e1; color: #d63384; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-bottom: 8px; }
         .sales-info { font-size: 0.9rem; color: #e83e8c; font-weight: bold; background: #fff0f5; padding: 5px 10px; margin: 0 15px 10px; border-radius: 10px; }
         .price { font-size: 1.25rem; font-weight: bold; color: #5a3a41; margin-bottom: 12px; }
         .btn { background: #ff69b4; color: white; border: none; padding: 8px 18px; border-radius: 25px; cursor: pointer; font-size: 0.95rem; font-weight: 600; box-shadow: 0 4px 10px rgba(255,105,180,0.3); transition: background 0.2s; }
         .btn:hover { background: #ff1493; }
-        footer { text-align: center; padding: 30px; color: #ff69b4; margin-top: 50px; font-weight: 600; }
+        .kitty-corner { position: absolute; top: 10px; right: 10px; width: 35px; z-index: 2; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.2)); }
+
+        /* Contenedor de la Gráfica */
+        .chart-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 8px 20px rgba(255,105,180,0.15); border: 2px solid #ffb6c1; margin-bottom: 40px; }
+        
+        footer { text-align: center; padding: 30px; color: #ff69b4; margin-top: 50px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; }
     </style>
 </head>
 <body>
@@ -142,25 +142,51 @@ HTML_TEMPLATE = """
     </header>
 
     <div class="container">
-        <!-- Sección de Gráfica de Porcentajes -->
-        <div class="chart-card">
-            <h2 class="section-title">📊 Porcentaje de Ventas por Producto</h2>
-            <canvas id="salesChart" height="120"></canvas>
-        </div>
+        <!-- 1. PRIMERO: Catálogo de Productos -->
+        <h2 class="section-title">
+            <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_art.png" style="width: 35px;" alt="HK">
+            Productos en Venta (Hello Kitty Edition)
+            <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_art.png" style="width: 35px;" alt="HK">
+        </h2>
+        <div class="grid" id="productGrid"></div>
 
-        <!-- Catálogo de Productos con Unidades Vendidas -->
-        <h2 class="section-title">✨ Productos Disponibles & Unidades Vendidas</h2>
-        <div class="grid" id="productGrid">
-            <!-- Cargado dinámicamente con JS desde SQLite -->
+        <!-- 2. DESPUÉS: Gráfica de Porcentajes -->
+        <div class="chart-card">
+            <h2 class="section-title">
+                📊 Porcentaje de Ventas de Cada Producto
+            </h2>
+            <canvas id="salesChart" height="120"></canvas>
         </div>
     </div>
 
     <footer>
-        <p>🎀 Arelly Cosmetics App — Creado con Python, Flask & SQLite 🎀</p>
+        <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_art.png" style="width: 30px;" alt="HK">
+        <span>Arelly Cosmetics App — Creado con Python, Flask & SQLite</span>
+        <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_art.png" style="width: 30px;" alt="HK">
     </footer>
 
     <script>
-        // Cargar Estadísticas y Dibujar Gráfica de Barras en Porcentaje
+        async function loadProducts() {
+            const res = await fetch('/api/productos');
+            const productos = await res.json();
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+
+            productos.forEach(prod => {
+                grid.innerHTML += `
+                    <div class="card">
+                        <img class="kitty-corner" src="https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_art.png" alt="HK">
+                        <img class="prod-img" src="${prod.imagen}" alt="${prod.nombre}">
+                        <h3>${prod.nombre}</h3>
+                        <span class="badge">${prod.categoria}</span>
+                        <div class="sales-info">🛍️ Vendidos: ${prod.unidades_vendidas} uds.</div>
+                        <div class="price">$${prod.precio.toFixed(2)} MXN</div>
+                        <button class="btn">Comprar ✨</button>
+                    </div>
+                `;
+            });
+        }
+
         async function loadChart() {
             const res = await fetch('/api/estadisticas');
             const data = await res.json();
@@ -216,47 +242,21 @@ HTML_TEMPLATE = """
             });
         }
 
-        // Cargar Productos desde SQLite
-        async function loadProducts() {
-            const res = await fetch('/api/productos');
-            const productos = await res.json();
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = '';
-
-            productos.forEach(prod => {
-                grid.innerHTML += `
-                    <div class="card">
-                        <img src="${prod.imagen}" alt="${prod.nombre}">
-                        <h3>${prod.nombre}</h3>
-                        <span class="badge">${prod.categoria}</span>
-                        <div class="sales-info">🛍️ Vendidos: ${prod.unidades_vendidas} uds.</div>
-                        <div class="price">$${prod.precio.toFixed(2)} MXN</div>
-                        <button class="btn">Comprar ✨</button>
-                    </div>
-                `;
-            });
-        }
-
-        loadChart();
         loadProducts();
+        loadChart();
     </script>
 </body>
 </html>
 """
 
 
-# --- RUTAS FLASK ---
-
-
 @app.route("/", methods=["GET"])
 def home():
-    """Renderiza la página web principal de Arelly Cosmetics."""
     return render_template_string(HTML_TEMPLATE)
 
 
 @app.route("/api/productos", methods=["GET"])
 def get_productos():
-    """Obtiene los 5 productos y sus unidades vendidas desde SQLite."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute(
@@ -286,7 +286,6 @@ def get_productos():
 
 @app.route("/api/estadisticas", methods=["GET"])
 def get_estadisticas():
-    """Calcula el porcentaje de ventas de cada producto."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
